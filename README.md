@@ -34,5 +34,11 @@ Client.ask(string promt, out_format, file_name=nil)
   https://habr.com/ru/articles/832984/
 
 
+## Специально для Сергея
+Это лабораторная работа в крусе "Парадигмы и технологии программирования"
+Лабу делали студенты группы ФИИИТ 2.4 :
+* [Игнатенко Николай, NikolyaTruLaLaLa](https://github.com/NikolyaTruLaLaLa)
+* [Новиков Александр, Kombat712](https://github.com/Kombat712)
+
 
 
