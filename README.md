@@ -31,7 +31,7 @@ Client.ask(string promt, out_format, file_name=nil)
 * Про Gemma 3
   https://habr.com/ru/articles/890268/
 
-* Про дообучение Gemma 3 4b в примере 3
+* Про дообучение Gemma 3 4b в примере 4
   https://habr.com/ru/articles/832984/
 
 
