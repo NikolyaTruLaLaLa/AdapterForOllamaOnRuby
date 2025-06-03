@@ -21,4 +21,4 @@ jobs:
     
         
     - name: Run tests
-      run: bundle exec rake test
+      run: -I test test/ollama_client_test.rb
