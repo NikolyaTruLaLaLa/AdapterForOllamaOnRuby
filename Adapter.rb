@@ -27,24 +27,51 @@ class OllamaClient
   full_response.strip()
   end
 
-  # скачана ли модель?
-  def isReady?()
-    res = false
-    Open3.popen3("ollama list") do |stdin, stdout, stderr, wait_thr|
-      stdout.each_line { |line| res = res || line.include?(@model_name)}
-    end
-    res
+  def self.list_models
+    response = HTTParty.get("#{API_BASE}/tags")
+    JSON.parse(response.body)['models'] rescue []
   end
 
-  # скачивание
-  def setUpModel()
-    puts "Начинаем скачивание модели"
-    system("ollama pull #{@model_name}")
-    puts "Готово"
+  def self.server_available?
+  response = HTTParty.get("#{API_BASE}/tags", timeout: 10)
+  response.success?
+  rescue
+  false
   end
 
+  private
 
-  def deleteModel()
-    system("ollama rm #{@model_name}")
+
+  def send_request(endpoint, body, stream: false, method: :post)
+      url = "#{@API_BASE_URL}#{endpoint}"
+
+      options = {
+        headers: { 'Content-Type' => 'application/json' },
+        body: body,
+        timeout: 300  # Увеличиваем таймаут до 5 минут
+      }
+
+      if stream
+        options[:stream_body] = true
+        response = HTTParty.post(url, options)
+      Enumerator.new do |yielder|
+        response.body.each_line do |line|
+          next if line.strip.empty?
+          parsed = JSON.parse(line) rescue nil
+          yielder << parsed if parsed
+        end
+      end
+      else
+        case method
+        when :delete
+          HTTParty.delete(url, options)
+        else
+          HTTParty.post(url, options)
+        end
+      end
+      rescue Net::ReadTimeout => e
+        { 'error' => "Timeout: #{e.message}" }
+      rescue SocketError, Errno::ECONNREFUSED => e
+        { 'error' => "Connection failed: #{e.message}" }
   end
 end
