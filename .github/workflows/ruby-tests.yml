@@ -21,4 +21,4 @@ jobs:
     
         
     - name: Run tests
-      run: -I test test/ollama_client_test.rb
+      run: ruby -I test test/ollama_client_test.rb
