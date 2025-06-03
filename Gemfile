@@ -9,8 +9,7 @@ gem 'rspec'
 gem 'webmock'  
 
 
-group :test do
-  gem 'minitest'
-  gem 'minitest-reporters' 
-  gem 'rake'
-end
+
+gem 'minitest'
+gem 'minitest-reporters' 
+gem 'rake'
