@@ -59,11 +59,16 @@ class OllamaClient
     JSON.parse(response.body)['models'] rescue []
   end
 
+  def pull_model(stream: false)
+    body = { name: @model_name, stream: stream }.to_json
+    send_request('/pull', body, stream: stream)
+  end
+
   def self.server_available?
-  response = HTTParty.get("#{API_BASE}/tags", timeout: 10)
-  response.success?
+    response = HTTParty.get("#{API_BASE}/tags", timeout: 10)
+    response.success?
   rescue
-  false
+    false
   end
 
   private
