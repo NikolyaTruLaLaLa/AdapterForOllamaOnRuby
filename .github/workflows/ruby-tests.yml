@@ -10,19 +10,16 @@ jobs:
   test:
     runs-on: ubuntu-latest
     
-    services:
-      ollama:
-        image: ollama/ollama
-        ports:
-          - "11434:11434"
-    
     steps:
     - uses: actions/checkout@v4
-    
-    
-    
-        
-    - name: Install lib
+    - name: Set up Ruby ${{ matrix.ruby-version }}
+      uses: ruby/setup-ruby@ec02537da5712d66d4d50a0f33b7eb52773b5ed1
+      with:
+        ruby-version: ${{ matrix.ruby-version }}
+    - name: Install dependencies
       run: bundle install
+    
+    
+    
     - name: Run Test
       run: ruby -I test test/ollama_client_test.rb
