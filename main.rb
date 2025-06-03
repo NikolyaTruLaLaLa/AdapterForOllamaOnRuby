@@ -1,8 +1,12 @@
 require_relative 'Adapter'
 
+ 
+#puts OllamaClient.list_models
+client = OllamaClient.new('llama2:7b')
+#puts OllamaClient.list_model
+
+client.setUpModel
 
 
-client = OllamaClient.new("ALIENTELLIGENCE/imagegenaiprompter:latest");
-#client.setUpModel
-#puts client.generate("Привет")
-puts client.deleteModel
+
+

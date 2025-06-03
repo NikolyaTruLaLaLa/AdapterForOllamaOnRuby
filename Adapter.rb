@@ -1,50 +1,106 @@
-require 'fileutils'
-require 'open3'
+require 'httparty'
+require 'json'
 
 class OllamaClient
-  
 
-  def initialize(model_name)
+  API_BASE = 'http://localhost:11434/api'.freeze
+
+
+  def initialize(model_name, api = 'http://localhost:11434/api')
     @model_name = model_name
+    @API_BASE_URL = api
+    
   end
 
 
+  def generate(prompt, stream: false, options: {})
+    body = {
+      model: @model_name,
+      prompt: prompt,
+      stream: stream,
+      options: options
+    }.compact.to_json
 
-  # генерация
-  def generate(prompt)
-
-  command = "ollama run #{@model_name} '#{prompt}'"
-  full_response = ""
-  Open3.popen3(command) do |stdin, stdout, stderr, wait_thr|
-    stdin.puts(prompt)
-    stdin.close
-    stdout.each_line { |line| full_response += line.chomp + " "}
-
-    unless wait_thr.value.success?
-      puts "Ошибка: #{stderr.read}"
-    end
-  end
-  full_response.strip()
+    send_request('/generate', body, stream: stream)
   end
 
-  # скачана ли модель?
-  def isReady?()
-    res = false
-    Open3.popen3("ollama list") do |stdin, stdout, stderr, wait_thr|
-      stdout.each_line { |line| res = res || line.include?(@model_name)}
-    end
-    res
+
+  def chat(messages, stream: false, options: {})
+    body = {
+      model: @model_name,
+      messages: messages,
+      stream: stream,
+      options: options
+    }.compact.to_json
+
+    send_request('/chat', body, stream: stream)
   end
 
-  # скачивание
   def setUpModel()
-    puts "Начинаем скачивание модели"
-    system("ollama pull #{@model_name}")
-    puts "Готово"
-  end
+      puts "Начинаем скачивание модели"
+      system("ollama pull #{@model_name}")
+      puts "Готово"
+    end
 
 
-  def deleteModel()
-    system("ollama rm #{@model_name}")
+  def push_model(insecure: false, stream: false)
+    body = { name: @model_name, insecure: insecure, stream: stream }.to_json
+    send_request('/push', body, stream: stream)
+    print "Готово"
   end
+
+  def delete_model
+    body = { name: @model_name }.to_json
+    send_request('/delete', body, method: :delete)
+  end
+  ####
+  def self.list_models
+    response = HTTParty.get("#{API_BASE}/tags")
+    JSON.parse(response.body)['models'] rescue []
+  end
+
+  def self.server_available?
+  response = HTTParty.get("#{API_BASE}/tags", timeout: 10)
+  response.success?
+  rescue
+  false
+  end
+
+  private
+
+
+  def send_request(endpoint, body, stream: false, method: :post)
+      url = "#{@API_BASE_URL}#{endpoint}"
+
+      options = {
+        headers: { 'Content-Type' => 'application/json' },
+        body: body,
+        timeout: 300  # Увеличиваем таймаут до 5 минут
+      }
+
+      if stream
+        options[:stream_body] = true
+        response = HTTParty.post(url, options)
+      Enumerator.new do |yielder|
+        response.body.each_line do |line|
+          next if line.strip.empty?
+          parsed = JSON.parse(line) rescue nil
+          yielder << parsed if parsed
+        end
+      end
+      else
+        case method
+        when :delete
+          HTTParty.delete(url, options)
+        else
+          HTTParty.post(url, options)
+        end
+      end
+      rescue Net::ReadTimeout => e
+        { 'error' => "Timeout: #{e.message}" }
+      rescue SocketError, Errno::ECONNREFUSED => e
+        { 'error' => "Connection failed: #{e.message}" }
+  end
+  
+      
 end
