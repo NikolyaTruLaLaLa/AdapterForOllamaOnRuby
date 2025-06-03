@@ -10,15 +10,26 @@ jobs:
   test:
     runs-on: ubuntu-latest
     
+    services:
+      ollama:
+        image: ollama/ollama
+        ports:
+          - "11434:11434"
+    
     steps:
     - uses: actions/checkout@v4
-    - uses: ruby/setup-ruby@ec02537da5712d66d4d50a0f33b7eb52773b5ed1
+    
+    - uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.1'
-    - run: bundle install
+        bundler-cache: true
     
-    
-    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential
+        gem install webmock minitest --no-document
     
     - name: Run Test
-      run: ruby -I test test/ollama_client_test.rb
+      run: |
+        ruby -I test test/ollama_client_test.rb
