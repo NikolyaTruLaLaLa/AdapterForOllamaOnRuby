@@ -15,6 +15,7 @@ GEM
       mini_mime (>= 1.0.0)
       multi_xml (>= 0.5.2)
     mini_mime (1.1.5)
+    minitest (5.25.5)
     multi_xml (0.7.2)
       bigdecimal (~> 3.1)
     public_suffix (6.0.2)
@@ -42,6 +43,7 @@ PLATFORMS
 
 DEPENDENCIES
   httparty
+  minitest
   rspec
   webmock
 
