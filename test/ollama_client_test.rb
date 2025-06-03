@@ -15,5 +15,7 @@ class OllamaClientTest < Minitest::Test
     
     assert ans.any?, "Должны быть получены данные о прогрессе"
    
+
+    
   end
 end
