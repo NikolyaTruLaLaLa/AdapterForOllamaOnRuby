@@ -8,7 +8,7 @@ class OllamaClient
 
   def initialize(model_name, api = 'http://localhost:11434/api')
     @model_name = model_name
-    @API_BASE_URL = api
+      @API_BASE_URL = api
     
   end
 
@@ -104,3 +104,4 @@ class OllamaClient
   
       
 end
+
